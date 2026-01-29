@@ -1,0 +1,5 @@
+url = "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
+variant = "debian13"
+name = "Debian 13"
+description = "Cloud image based on the latest debian 13 stable build"
+cloudinit_templates = ["meta-data.template", "user-data.template"]

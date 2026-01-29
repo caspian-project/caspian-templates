@@ -1,5 +1,5 @@
 url = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2"
 variant = "fedora43"
 name = "Fedora 43"
-description = ""
+description = "Cloud image based on Fedora 43"
 cloudinit_templates = ["meta-data.template", "user-data.template"]
