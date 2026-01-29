@@ -9,4 +9,4 @@ chpasswd:
 resize_rootfs: True
 ssh_pwauth: True
 package_upgrade: true
-packages: ["waypipe"]
+packages: ["waypipe", "xwayland-satellite"]
