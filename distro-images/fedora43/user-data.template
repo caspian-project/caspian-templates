@@ -6,7 +6,47 @@ chpasswd:
   list: |
     {username}:{password}
   expire: False
+
 resize_rootfs: True
 ssh_pwauth: True
 package_upgrade: true
-packages: ["waypipe", "xwayland-satellite"]
+packages:
+  - sommelier
+  - xorg-x11-server-Xwayland
+  - socat
+  - dbus-daemon
+
+# virtio_vsock may be built into the cloud kernel (=y) rather than a module.
+# Try to load it; ignore failure if it's already compiled in.
+bootcmd:
+  - [ sh, -c, "modprobe virtio_vsock || true" ]
+
+write_files:
+  # Bridge vsock port 22 → local sshd so the host can SSH in via
+  # "socat - VSOCK-CONNECT:<cid>:22" without needing a network interface.
+  - path: /etc/systemd/system/vsock-ssh.service
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=vsock to SSH bridge
+      After=sshd.service
+      Wants=sshd.service
+
+      [Service]
+      ExecStart=/usr/bin/socat VSOCK-LISTEN:22,reuseaddr,fork TCP4:localhost:22
+      Restart=on-failure
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - systemctl enable --now vsock-ssh.service
+
+  # Start sommelier as a user service to provide a persistent wayland socket.
+  # This allows apps to connect via the socket rather than using --virtgpu-channel.
+  - loginctl enable-linger {username}
+  - su - {username} -c "mkdir -p ~/.config/systemd/user"
+  - su - {username} -c "echo '[Unit]\nDescription=Sommelier Wayland proxy\nAfter=default.target\n[Service]\nType=simple\nExecStart=/usr/local/bin/sommelier --socket=wayland-0\nRestart=on-failure\n[Install]\nWantedBy=default.target' > ~/.config/systemd/user/sommelier.service"
+  - su - {username} -c "systemctl --user enable --now sommelier.service"
