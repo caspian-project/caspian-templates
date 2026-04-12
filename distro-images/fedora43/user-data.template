@@ -1,12 +1,14 @@
 #cloud-config
 system_info:
   default_user:
-    name: {username}
+    name: "provision"
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
 chpasswd:
   list: |
-    {username}:{password}
+    provision:provision
   expire: False
+hostname: {{ hostname }}
+packages:
+  - whois
 resize_rootfs: True
 ssh_pwauth: True
-package_upgrade: true
-packages: ["waypipe", "xwayland-satellite"]
