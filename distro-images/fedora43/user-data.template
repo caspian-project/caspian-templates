@@ -7,8 +7,12 @@ chpasswd:
   list: |
     provision:provision
   expire: False
-hostname: {{ hostname }}
+hostname: "{{ hostname }}"
 packages:
-  - whois
+  - mesa-dri-drivers
 resize_rootfs: True
-ssh_pwauth: True
+ssh_pwauth: False
+{% if ssh_public_key %}
+ssh_authorized_keys:
+  - "{{ ssh_public_key }}"
+{% endif %}
